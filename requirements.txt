@@ -2,3 +2,4 @@ qdrant-client>=1.12
 sentence-transformers>=3.0
 pandas>=2.0
 tqdm>=4.65
+streamlit>=1.36
