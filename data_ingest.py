@@ -13,7 +13,7 @@ MODEL_NAME = "all-MiniLM-L6-v2"
 VECTOR_DIM = 384
 CSV_PATH = "mtsamples.csv"
 BATCH_SIZE = 64
-PAYLOAD_TRANSCRIPTION_LIMIT = 2000   # keep payload reasonable
+PAYLOAD_TRANSCRIPTION_LIMIT = 2000
 
 def load_and_clean(path: str) -> pd.DataFrame:
     """Read the CSV and drop empty rows / normalize whitespace."""
