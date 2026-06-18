@@ -1,24 +1,3 @@
-"""
-app.py
-------
-Streamlit interface for semantic search over the MTSamples Qdrant collection.
-
-Features:
-  - Free-text query, encoded on the fly with sentence-transformers
-  - Sidebar filter: medical specialty (multi-select, payload-indexed)
-  - Sliders for the number of results (top-K) and a minimum similarity score
-  - One-click example queries for the demo
-  - Per-result card with score, specialty, description, and expandable
-    transcription
-
-Run:
-    streamlit run app.py
-
-Prerequisites:
-  - Qdrant running locally (docker compose up -d)
-  - Collection 'mtsamples' already populated (python data-ingest.py)
-"""
-
 import streamlit as st
 from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchAny
@@ -27,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 # ---------- Configuration ----------
 QDRANT_URL = "http://localhost:6333"
 COLLECTION = "mtsamples"
-MODEL_NAME = "all-MiniLM-L6-v2"
+MODEL_NAME = "pritamdeka/S-PubMedBert-MS-MARCO" #"all-MiniLM-L6-v2"
 
 EXAMPLE_QUERIES = [
     "Patient with chest pain and shortness of breath when climbing stairs",
@@ -113,7 +92,7 @@ selected_specialties = st.sidebar.multiselect(
     help="Leave empty to search across all specialties.",
 )
 
-top_k = st.sidebar.slider("Number of results (top-K)", 1, 20, 5)
+top_k = st.sidebar.slider("Number of results (top-K)", 1, 100, 5)
 min_score = st.sidebar.slider("Minimum similarity score", 0.0, 1.0, 0.0, 0.05)
 
 with st.sidebar.expander("About"):

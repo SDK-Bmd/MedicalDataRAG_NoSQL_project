@@ -1,25 +1,10 @@
-"""
-query.py
---------
-Three demonstration queries against the 'mtsamples' Qdrant collection:
-
-  Q1. Pure semantic search (no filter) -- shows that matches are found even
-      when the query does not share the same vocabulary as the documents.
-  Q2. The same query, restricted to the 'Cardiovascular / Pulmonary'
-      specialty via a payload filter (hybrid search).
-  Q3. A different clinical theme, to show that the embedding model captures
-      a wide range of medical concepts.
-
-Run after ingest.py has populated the collection.
-"""
-
 from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from sentence_transformers import SentenceTransformer
 
 QDRANT_URL = "http://localhost:6333"
 COLLECTION = "mtsamples"
-MODEL_NAME = "all-MiniLM-L6-v2"
+MODEL_NAME = "pritamdeka/S-PubMedBert-MS-MARCO" #"all-MiniLM-L6-v2"
 TOP_K = 5
 
 
