@@ -1,4 +1,4 @@
-qdrant-client>=1.12
+qdrant-client>=1.12,<1.13
 sentence-transformers>=3.0
 pandas>=2.0
 tqdm>=4.65
