@@ -1,10 +1,16 @@
 from qdrant_client import QdrantClient
-from qdrant_client.models import Filter, FieldCondition, MatchValue
+from qdrant_client.models import (
+    FieldCondition,
+    Filter,
+    MatchValue,
+    QuantizationSearchParams,
+    SearchParams,
+)
 from sentence_transformers import SentenceTransformer
 
 QDRANT_URL = "http://localhost:6333"
 COLLECTION = "mtsamples"
-MODEL_NAME = "pritamdeka/S-PubMedBert-MS-MARCO" #"all-MiniLM-L6-v2"
+MODEL_NAME = "pritamdeka/S-PubMedBert-MS-MARCO"   # must match ingest.py
 TOP_K = 5
 
 
@@ -27,6 +33,15 @@ def search(client: QdrantClient, model: SentenceTransformer,
         query_filter=qfilter,
         limit=k,
         with_payload=True,
+        # Use INT8 quantized vectors for speed, then rescore the top
+        # candidates against the original float32 vectors for accuracy.
+        search_params=SearchParams(
+            quantization=QuantizationSearchParams(
+                ignore=False,
+                rescore=True,
+                oversampling=2.0,    # fetch 2*K candidates before rescoring
+            )
+        ),
     )
     return response.points
 

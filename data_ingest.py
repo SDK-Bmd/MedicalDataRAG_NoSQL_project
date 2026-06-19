@@ -7,6 +7,9 @@ from qdrant_client.models import (
     OptimizersConfigDiff,
     PayloadSchemaType,
     PointStruct,
+    ScalarQuantization,
+    ScalarQuantizationConfig,
+    ScalarType,
     VectorParams,
 )
 from sentence_transformers import SentenceTransformer
@@ -15,16 +18,18 @@ from tqdm import tqdm
 # ---------- Configuration ----------
 QDRANT_URL = "http://localhost:6333"
 COLLECTION = "mtsamples"
+
 # Medical-domain model -- 768 dimensions, much better recall on clinical text
-MODEL_NAME = "pritamdeka/S-PubMedBert-MS-MARCO" #"all-MiniLM-L6-v2"
-VECTOR_DIM = 768 #384
-BATCH_SIZE = 64
+MODEL_NAME = "pritamdeka/S-PubMedBert-MS-MARCO"
+VECTOR_DIM = 768
+
 CSV_PATH = "mtsamples.csv"
 BATCH_SIZE = 32                       # smaller batches -> smaller payloads
 PAYLOAD_TRANSCRIPTION_LIMIT = 2000
 HTTP_TIMEOUT_SEC = 120                # generous client-side timeout
 UPSERT_MAX_RETRIES = 3
-INDEXING_THRESHOLD_DEFAULT = 20000    # 2000
+INDEXING_THRESHOLD_DEFAULT = 20000    # Qdrant default; used to re-enable indexing
+
 
 def load_and_clean(path: str) -> pd.DataFrame:
     """Read the CSV and drop empty rows / normalize whitespace."""
@@ -51,8 +56,20 @@ def recreate_collection(client: QdrantClient) -> None:
 
     client.create_collection(
         collection_name=COLLECTION,
-        vectors_config=VectorParams(size=VECTOR_DIM, distance=Distance.COSINE),
-        # disable indexing during bulk loading
+        vectors_config=VectorParams(
+            size=VECTOR_DIM,
+            distance=Distance.COSINE,
+            on_disk=True,                # original float32 vectors live on disk
+        ),
+        # INT8 scalar quantization: 4x smaller, kept in RAM for speed
+        quantization_config=ScalarQuantization(
+            scalar=ScalarQuantizationConfig(
+                type=ScalarType.INT8,
+                quantile=0.99,           # clip outliers before quantizing
+                always_ram=True,
+            )
+        ),
+        # disable HNSW indexing during bulk loading
         optimizers_config=OptimizersConfigDiff(indexing_threshold=0),
     )
 
